@@ -4,31 +4,81 @@
 <meta charset="UTF-8">
 <title>QR PRO</title>
 
-<!-- Librería para generar QR (NO tocar) -->
+<!-- Librería QR -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<!-- Cloudinary Widget (NO tocar) -->
+<!-- Cloudinary -->
 <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
 
 <style>
 body{
-    font-family: Arial;
-    text-align:center;
-    background:#0f2027;
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
     color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
 }
-input, textarea, button{
-    margin:10px;
-    padding:10px;
-    width:80%;
+
+.container{
+    width:90%;
+    max-width:500px;
+    background:#ffffff10;
+    backdrop-filter: blur(15px);
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    text-align:center;
 }
+
+h2{
+    margin-top:20px;
+}
+
+input, textarea{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    border:none;
+    border-radius:10px;
+    outline:none;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:#00c6ff;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#0072ff;
+}
+
 #qrcode{
     margin-top:20px;
+    display:flex;
+    justify-content:center;
+}
+
+#downloadBtn{
+    margin-top:15px;
+    background:#00ffcc;
 }
 </style>
 </head>
 
 <body>
+
+<div class="container">
 
 <h2>1. QR desde link</h2>
 <input type="text" id="link" placeholder="https://...">
@@ -43,14 +93,35 @@ input, textarea, button{
 
 <div id="qrcode"></div>
 
+<button id="downloadBtn" onclick="descargarQR()">Descargar QR</button>
+
+</div>
+
 <script>
 
 // =======================
-// FUNCIÓN GENERAL QR
+// GENERAR QR
 // =======================
 function generarQR(url){
     document.getElementById("qrcode").innerHTML="";
     new QRCode(document.getElementById("qrcode"), url);
+}
+
+// =======================
+// DESCARGAR QR
+// =======================
+function descargarQR(){
+    let img = document.querySelector("#qrcode img");
+
+    if(!img){
+        alert("Primero genera un QR");
+        return;
+    }
+
+    let link = document.createElement("a");
+    link.href = img.src;
+    link.download = "qr.png";
+    link.click();
 }
 
 // =======================
@@ -68,25 +139,17 @@ function subirArchivo(){
 
     var widget = cloudinary.createUploadWidget({
 
-        // 🔴 AQUÍ VA TU CLOUD NAME
-        // Lo encuentras en el dashboard de Cloudinary
         cloudName: 'dzdmmrpxa',
-
-        // 🔴 AQUÍ VA TU UPLOAD PRESET
-        // Este lo tienes que crear manualmente (te explico abajo)
         uploadPreset: 'unsigned_preset'
 
     }, (error, result) => {
 
         if (!error && result && result.event === "success") {
 
-            // 🔥 ESTE ES EL LINK REAL DEL ARCHIVO SUBIDO
             let archivo = result.info.secure_url;
 
-            // 👉 OPCIONAL: abrir Word, PDF tipo online (como Office)
             let urlVista = "https://view.officeapps.live.com/op/view.aspx?src=" + archivo;
 
-            // 🔥 GENERA EL QR
             generarQR(urlVista);
         }
     });
@@ -95,14 +158,12 @@ function subirArchivo(){
 }
 
 // =======================
-// 3. TEXTO → DOCUMENTO
+// 3. TEXTO
 // =======================
 function crearTexto(){
 
     let texto = document.getElementById("texto").value;
 
-    // 🔴 ESTO SOLO FUNCIONA LOCALMENTE (NO EN INTERNET)
-    // porque es un archivo temporal
     let blob = new Blob([texto], { type: "text/plain" });
     let url = URL.createObjectURL(blob);
 
